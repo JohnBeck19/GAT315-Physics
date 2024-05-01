@@ -2,6 +2,7 @@
 #include "Body.h"
 #include "Mathf.h"
 #include "raymath.h"
+#include "World.h"
 #include <stdlib.h>
 #include <assert.h>
 
@@ -11,9 +12,6 @@ int main(void)
 	InitWindow(1280, 720, "Physics Engine");
 	SetTargetFPS(60);
 
-	Body* bodies = (Body*)malloc(sizeof(Body) * MAX_BODIES);
-	assert(bodies);
-	int bodyCount = 0;
 
 	//game loop
 	while (!WindowShouldClose())
@@ -23,11 +21,11 @@ int main(void)
 		float fps = (float)GetFPS();
 
 		Vector2 position = GetMousePosition();
-		if (IsMouseButtonPressed(0))
+		if (IsMouseButtonDown(0))
 		{
-			bodies[bodyCount].position = position;
-			bodies[bodyCount].velocity = CreateVector2(GetRandomFloatValue(-5,5),GetRandomFloatValue(-5,5));
-			bodyCount++;
+			Body* body = CreateBody();
+			body->position = position;
+			body->velocity = CreateVector2(GetRandomFloatValue(-5,5),GetRandomFloatValue(-5,5));
 		}
 
 		//draw
@@ -37,10 +35,16 @@ int main(void)
 		DrawCircle((int)position.x, (int)position.y, 10, BLUE);
 
 		//update bodies
-		for (int i = 0; i < bodyCount; i++)
+		// update / draw bodies
+		Body* body = bodies;
+		while (body) // do while we have a valid pointer, will be NULL at the end of the list
 		{
-			bodies[i].position = Vector2Add(bodies[i].position, bodies[i].velocity);
-			DrawCircle((int)bodies[i].position.x,(int)bodies[i].position.y, 10, RED);
+			// update body position
+			// draw body
+			body->position = Vector2Add(body->position, body->velocity);
+			DrawCircle((int)body->position.x, (int)body->position.y, 10, RED);
+
+			body = body->next; // get next body
 		}
 		//stats
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps,1000/fps), 10, 10, 20, LIME);
