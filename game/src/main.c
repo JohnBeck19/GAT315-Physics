@@ -1,6 +1,7 @@
-#include "raylib.h"
 #include "Body.h"
+#include "raylib.h"
 #include "Mathf.h"
+#include "Integrator.h"
 #include "raymath.h"
 #include "World.h"
 #include <stdlib.h>
@@ -23,11 +24,26 @@ int main(void)
 		Vector2 position = GetMousePosition();
 		if (IsMouseButtonDown(0))
 		{
-			Body* body = CreateBody();
+			ncBody* body = CreateBody();
 			body->position = position;
-			body->velocity = CreateVector2(GetRandomFloatValue(-5,5),GetRandomFloatValue(-5,5));
+			body->mass = GetRandomFloatValue(1, 10);
 		}
 
+		//apply force
+		ncBody* body = ncBodies;
+		while (body)
+		{
+			ApplyForce(body, CreateVector2(0,-100));
+			body = body->next; // get next body
+		}
+
+		body = ncBodies;
+		while (body) 
+		{
+			ExplicitEuler(body, dt);
+			ClearForce(body);
+			body = body->next; // get next body
+		}
 		//draw
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -36,15 +52,12 @@ int main(void)
 
 		//update bodies
 		// update / draw bodies
-		Body* body = bodies;
-		while (body) // do while we have a valid pointer, will be NULL at the end of the list
+		body = ncBodies;
+		while (body)
 		{
-			// update body position
-			// draw body
-			body->position = Vector2Add(body->position, body->velocity);
-			DrawCircle((int)body->position.x, (int)body->position.y, 10, RED);
-
-			body = body->next; // get next body
+			DrawCircle((int)body->position.x, (int)body->position.y, body->mass, RED);
+		
+			body = body->next; 
 		}
 		//stats
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps,1000/fps), 10, 10, 20, LIME);

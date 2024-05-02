@@ -2,35 +2,38 @@
 #include "World.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
-Body* bodies = NULL;
-int bodyCount = 0;
+ncBody* ncBodies = NULL;
+int ncBodyCount = 0;
 
-Body* CreateBody()
+ncBody* CreateBody()
 {
 	//allocate
-	Body* body = (Body*)malloc(sizeof(Body));
+	ncBody* body = (ncBody*)malloc(sizeof(ncBody));
 	assert(body);
+
+	memset(body, 0, sizeof(ncBody));
 
 	//set the prev and next of the new body
 	body->prev = NULL;
-	body->next = bodies;
+	body->next = ncBodies;
 	
 	//if list is not empty
-	if (bodyCount > 0)
+	if (ncBodyCount > 0)
 	{
 		//update prev pointer of head
-		bodies->prev = body;
+		ncBodies->prev = body;
 	}
 	//set the new body to the head
-	bodies = body;
+	ncBodies = body;
 	//increment list amount
-	bodyCount++;
+	ncBodyCount++;
 	//return the body
 	return body;
 }
 
-void DestroyBody(Body* body)
+void DestroyBody(ncBody* body)
 {
 	
 	assert(body);
@@ -39,9 +42,9 @@ void DestroyBody(Body* body)
 	//if body has next then set the next's previous to the previous body
 	if (body->next) body->next->prev = body->prev;
 	//if body is head set the next body to the head
-	if (body == bodies) bodies = bodies->next;
+	if (body == ncBodies) ncBodies = ncBodies->next;
 	//deincrement bodycount
-	bodyCount--;
+	ncBodyCount--;
 	//deallocate memory
 	free(body);
 
