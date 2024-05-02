@@ -13,6 +13,8 @@ int main(void)
 	InitWindow(1280, 720, "Physics Engine");
 	SetTargetFPS(60);
 
+	//initalize world
+	ncGravity = (Vector2){ 0,30 };
 
 	//game loop
 	while (!WindowShouldClose())
@@ -27,21 +29,26 @@ int main(void)
 			ncBody* body = CreateBody();
 			body->position = position;
 			body->mass = GetRandomFloatValue(1, 10);
+			body->inverseMass = 1 / body->mass;
+			body->type = BT_DYNAMIC;
+			body->damping = 0.5f;
+			body->gravityScale = 5;
+			ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, FM_VELOCITY);
 		}
 
 		//apply force
 		ncBody* body = ncBodies;
 		while (body)
 		{
-			ApplyForce(body, CreateVector2(0,-100));
+			
+			//ApplyForce(body, CreateVector2(0,-100),FM_FORCE);
 			body = body->next; // get next body
 		}
 
 		body = ncBodies;
 		while (body) 
 		{
-			ExplicitEuler(body, dt);
-			ClearForce(body);
+			Step(body, dt);
 			body = body->next; // get next body
 		}
 		//draw

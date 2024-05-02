@@ -1,11 +1,13 @@
 #pragma once
 #include "World.h"
+#include "Body.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 
 ncBody* ncBodies = NULL;
 int ncBodyCount = 0;
+Vector2 ncGravity;
 
 ncBody* CreateBody()
 {
