@@ -18,6 +18,9 @@
     <ClCompile Include="src\Body.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Force.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Body.h">
@@ -30,6 +33,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Integrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Force.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,8 +4,10 @@
 #include "Integrator.h"
 #include "raymath.h"
 #include "World.h"
+#include "Force.h"
 #include <stdlib.h>
 #include <assert.h>
+
 
 #define MAX_BODIES 100
 int main(void)
@@ -24,32 +26,63 @@ int main(void)
 		float fps = (float)GetFPS();
 
 		Vector2 position = GetMousePosition();
-		if (IsMouseButtonDown(0))
+		if (IsMouseButtonPressed(0))
 		{
-			ncBody* body = CreateBody();
-			body->position = position;
-			body->mass = GetRandomFloatValue(1, 10);
-			body->inverseMass = 1 / body->mass;
-			body->type = BT_DYNAMIC;
-			body->damping = 0.5f;
-			body->gravityScale = 5;
-			ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, FM_VELOCITY);
+			switch (GetRandomValue(1, 3))
+			{
+				case 1:
+					for (int i = 0; i < 50; i++)
+					{
+						ncBody* body = CreateBody();
+						body->position = position;
+						body->mass = GetRandomFloatValue(5, 30);
+						body->inverseMass = 1 / body->mass;
+						body->type = BT_DYNAMIC;
+						body->damping = 0.5f;
+						body->gravityScale = 5;
+						body->color = (Color){ 255,0,GetRandomFloatValue(0,255),255 };
+						ApplyForce(body, (Vector2) { GetRandomFloatValue(-200, 200), GetRandomFloatValue(-200, 200) }, FM_VELOCITY);
+					}
+					break;
+				case 2:
+					for (int i = 0; i < 50; i++)
+					{
+						ncBody* body = CreateBody();
+						body->position = position;
+						body->mass = GetRandomFloatValue(1, 10);
+						body->inverseMass = 1 / body->mass;
+						body->type = BT_DYNAMIC;
+						body->damping = 0.25f;
+						body->gravityScale = 5;
+						body->color = (Color){ GetRandomFloatValue(0,255),GetRandomFloatValue(0,255),GetRandomFloatValue(0,255),255 };
+						Vector2 force = Vector2Scale(GetVector2FromAngle(GetRandomFloatValue(0, 360) * DEG2RAD), GetRandomFloatValue(1000, 2000));
+						ApplyForce(body, force, FM_IMPULSE);
+					}
+					break;
+				case 3:
+					for (int i = 0; i < 50; i++)
+					{
+						ncBody* body = CreateBody();
+						body->position = position;
+						body->mass = GetRandomFloatValue(5, 15);
+						body->inverseMass = 1 / body->mass;
+						body->type = BT_DYNAMIC;
+						body->damping = 0.25f;
+						body->gravityScale = 10;
+						body->color = (Color){ 0,0,GetRandomFloatValue(100,255),255};
+						Vector2 force = Vector2Scale(GetVector2FromAngle(GetRandomFloatValue(0, 360) * DEG2RAD), GetRandomFloatValue(1000, 2000));
+						ApplyForce(body, force, FM_IMPULSE);
+					}
+					break;
 		}
 
-		//apply force
-		ncBody* body = ncBodies;
-		while (body)
-		{
 			
-			//ApplyForce(body, CreateVector2(0,-100),FM_FORCE);
-			body = body->next; // get next body
 		}
-
-		body = ncBodies;
-		while (body) 
+		//ApplyGravitation(ncBodies, 30);
+		for (ncBody* body = ncBodies; body; body = body->next)
 		{
+			//ApplyForce(body, CreateVector2(0,-100),FM_FORCE);
 			Step(body, dt);
-			body = body->next; // get next body
 		}
 		//draw
 		BeginDrawing();
@@ -59,12 +92,18 @@ int main(void)
 
 		//update bodies
 		// update / draw bodies
-		body = ncBodies;
-		while (body)
-		{
-			DrawCircle((int)body->position.x, (int)body->position.y, body->mass, RED);
 		
-			body = body->next; 
+		for (ncBody* body = ncBodies; body; body = body->next)
+		{
+			if (body->gravityScale == 10)
+			{
+				Vector2 vel = Vector2Scale(Vector2Normalize(body->velocity),body->mass*5);
+				Vector2 trail = (Vector2){ (int)body->position.x - vel.x,(int)body->position.y - vel.y };
+				DrawLineEx(body->position,trail,5, RED);
+			}
+			DrawCircle((int)body->position.x, (int)body->position.y, body->mass, body->color);
+
+			
 		}
 		//stats
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps,1000/fps), 10, 10, 20, LIME);
