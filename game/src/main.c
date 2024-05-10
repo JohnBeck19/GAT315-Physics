@@ -38,13 +38,11 @@ int main(void)
 			switch (GetRandomValue(1, 3))
 			{
 				case 1:
-					for (int i = 0; i < 50; i++)
+					for (int i = 0; i < 1; i++)
 					{
-						ncBody* body = CreateBody();
-						body->position = ConvertScreenToWorld(position);
-						body->mass = GetRandomFloatValue(ncEditorData.MassMinValue, ncEditorData.MassMaxValue);
-						body->inverseMass = 1 / body->mass;
-						body->type = BT_DYNAMIC;
+						ncBody* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(ncEditorData.MassMinValue, ncEditorData.MassMaxValue), ncEditorData.BodyTypeActive);
+						AddBody(body);
+						//body->type = ncEditorData.BodyTypeActive;
 						//body->damping = 0.5f;
 						body->gravityScale = 0;
 						body->color = (Color){ 255,0,GetRandomFloatValue(0,255),255 };
@@ -52,13 +50,10 @@ int main(void)
 					}
 					break;
 				case 2:
-					for (int i = 0; i < 50; i++)
+					for (int i = 0; i < 1; i++)
 					{
-						ncBody* body = CreateBody();
-						body->position = ConvertScreenToWorld(position);
-						body->mass = GetRandomFloatValue(ncEditorData.MassMinValue, ncEditorData.MassMaxValue);
-						body->inverseMass = 1 / body->mass;
-						body->type = BT_DYNAMIC;
+						ncBody* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(ncEditorData.MassMinValue, ncEditorData.MassMaxValue),BT_DYNAMIC);
+						AddBody(body);
 						//body->damping = 0.25f;
 						body->gravityScale = 5;
 						body->color = (Color){ GetRandomFloatValue(0,255),GetRandomFloatValue(0,255),GetRandomFloatValue(0,255),255 };
@@ -67,13 +62,10 @@ int main(void)
 					}
 					break;
 				case 3:
-					for (int i = 0; i < 50; i++)
+					for (int i = 0; i < 1; i++)
 					{
-						ncBody* body = CreateBody();
-						body->position = ConvertScreenToWorld(position);
-						body->mass = GetRandomFloatValue(ncEditorData.MassMinValue, ncEditorData.MassMaxValue);
-						body->inverseMass = 1 / body->mass;
-						body->type = BT_DYNAMIC;
+						ncBody* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(ncEditorData.MassMinValue, ncEditorData.MassMaxValue),BT_DYNAMIC);
+						AddBody(body);
 						//body->damping = 0.25f;
 						body->gravityScale = 10;
 						body->color = (Color){ 0,0,GetRandomFloatValue(100,255),255};
@@ -96,7 +88,7 @@ int main(void)
 		ClearBackground(BLACK);
 
 
-		DrawCircle((int)position.x, (int)position.y, 10, BLUE);
+		//DrawCircle((int)position.x, (int)position.y, 10, BLUE);
 
 		//update bodies
 		// update / draw bodies
@@ -106,8 +98,8 @@ int main(void)
 			Vector2 screen = ConvertWorldToScreen(body->position);
 			if (body->gravityScale == 10)
 			{
-				Vector2 vel = ConvertWorldToScreen(Vector2Scale(Vector2Normalize(body->velocity), ConvertWorldToPixel(body->mass)*5));
-				Vector2 trail = (Vector2){ (int)screen.x - vel.x,(int)screen.y - vel.y };
+				Vector2 vel = Vector2Scale(Vector2Normalize(body->velocity), ConvertWorldToPixel(body->mass)*5);
+				Vector2 trail = ConvertWorldToScreen((Vector2){ (int)body->position.x - vel.x,(int)body->position.y - vel.y });
 				DrawLineEx(screen, trail, 5, RED);
 			}
 			DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(body->mass), body->color);
@@ -116,7 +108,8 @@ int main(void)
 		}
 		//stats
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps,1000/fps), 10, 10, 20, LIME);
-		DrawEditor();
+		DrawEditor(position);
+		HideCursor();
 		DrawText(TextFormat("FRAME: %.4f", dt), 10, 30, 20, LIME);
 
 		EndDrawing();
