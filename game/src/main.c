@@ -47,13 +47,14 @@ int main(void)
 			DrawCircleLines(screen.x, screen.y, ConvertWorldToPixel(selectedBody->mass * 0.5) + 5, YELLOW);
 		}
 		//create body
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && IsKeyDown(KEY_LEFT_SHIFT)))
 		{
 				ncBody* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(ncEditorData.MassMinValue, ncEditorData.MassMaxValue), ncEditorData.BodyTypeActive);
 				AddBody(body);
 				//body->damping = 0.25f;
 				body->gravityScale = 10;
 				body->color = (Color){ 0,0,GetRandomFloatValue(100,255),255};
+				body->restitution = 0.8f;
 				//Vector2 force = Vector2Scale(GetVector2FromAngle(GetRandomFloatValue(0, 360) * DEG2RAD), GetRandomFloatValue(1000, 2000));
 		}
 
@@ -79,6 +80,8 @@ int main(void)
 		//collision
 		ncContact_t* contacts = NULL;
 		CreateContacts(ncBodies, &contacts);
+		SeparateContacts(contacts);
+		ResolveContacts(contacts);
 
 		//draw
 		BeginDrawing();

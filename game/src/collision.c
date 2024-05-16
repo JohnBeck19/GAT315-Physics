@@ -61,8 +61,43 @@ ncContact_t* GenerateContact(ncBody* body1, ncBody* body2)
 
 void SeparateContacts(ncContact_t* contacts)
 {
+	// Loop through each contact in the linked list
+	for (ncContact_t* contact = contacts; contact; contact = contact->next)
+	{
+		// Calculate the total inverse mass of the two bodies involved in the contact
+		float totalInverseMass = contact->body1->inverseMass + contact->body2->inverseMass;
+
+		// Calculate the separation vector based on the contact normal and depth,
+		// scaled by the inverse mass of the bodies
+		Vector2 separation = Vector2Scale(contact->normal, (contact->depth / totalInverseMass));
+
+		// Move the first body's position by the scaled separation vector,
+		// taking into account its inverse mass
+		contact->body1->position = Vector2Add(contact->body1->position, Vector2Scale(separation, contact->body1->inverseMass));
+
+		// Move the second body's position by the negated scaled separation vector,
+		// taking into account its inverse mass
+		contact->body2->position = Vector2Add(contact->body2->position, Vector2Scale(Vector2Negate(separation), contact->body2->inverseMass));
+	}
 }
+
 
 void ResolveContacts(ncContact_t* contacts)
 {
+	for (ncContact_t* contact = contacts; contact; contact = contact->next)
+	{
+		Vector2 rv = Vector2Subtract(contact->body1->velocity, contact->body2->velocity);
+		float nv = Vector2DotProduct(rv, contact->normal);
+		if (nv > 0) continue;
+
+		float tim = contact->body1->inverseMass + contact->body2->inverseMass;
+		float impulseMagnitude = (-(1 + contact->restitution) * nv / tim);
+		Vector2 iv = Vector2Scale(contact->normal, impulseMagnitude);
+
+		ApplyForce(contact->body1, iv, FM_IMPULSE);
+		ApplyForce(contact->body2, Vector2Negate(iv), FM_IMPULSE);
+
+
+
+	}
 }
