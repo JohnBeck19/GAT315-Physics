@@ -33,6 +33,8 @@ typedef struct ncBody
 	float damping;
 	Color color;
 
+	float restitution;
+
 	struct ncBody* next;
 	struct ncBody* prev;
 

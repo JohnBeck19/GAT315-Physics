@@ -1,4 +1,6 @@
 #include "editor.h"
+#include "Body.h"
+#include "render.h"
 #define RAYGUI_IMPLEMENTATION
 #include "../../raygui/src/raygui.h"
 
@@ -23,12 +25,12 @@ void InitEditor()
     ncEditorData.anchor02 = (Vector2){ 816, 368 };
     ncEditorData.anchor03 = (Vector2){ 816, 72 };
     ncEditorData.EditorBoxActive = true;
-    ncEditorData.MassMinValue = 0.1f;
-    ncEditorData.MassMaxValue = 0.5f;
+    ncEditorData.MassMinValue = 10.0f;
+    ncEditorData.MassMaxValue = 15.0f;
     ncEditorData.GravitationValue = 0.1f;
-    ncEditorData.DropdownBox004EditMode = false;
+    ncEditorData.BodyTypeEditMode = false;
     ncEditorData.BodyTypeActive = 0;
-    ncEditorData.GravityScaleValue = 0.0f;
+    ncEditorData.GravityScaleValue = 0.5f;
     ncEditorData.DampingSliderValue = 0.0f;
     editorRect = (Rectangle){ anchor01.x + 100, anchor01.y + 0, 312,600 };
 }
@@ -40,7 +42,7 @@ void UpdateEditor(Vector2 position)
 
 void DrawEditor(Vector2 position)
 {
-    if (ncEditorData.DropdownBox004EditMode) GuiLock();
+    if (ncEditorData.BodyTypeEditMode) GuiLock();
 
     if (ncEditorData.EditorBoxActive)
     {
@@ -53,8 +55,28 @@ void DrawEditor(Vector2 position)
     GuiGroupBox((Rectangle) { ncEditorData.anchor03.x + 100, ncEditorData.anchor03.y + 8, 256, 248 }, "Body");
     GuiSliderBar((Rectangle) { ncEditorData.anchor03.x + 212, ncEditorData.anchor03.y + 128, 120, 16 }, "Gravity Scale", NULL, & ncEditorData.GravityScaleValue, 0, 100);
     GuiSliderBar((Rectangle) { ncEditorData.anchor03.x + 212, ncEditorData.anchor03.y + 104, 120, 16 }, "Damping", NULL, & ncEditorData.DampingSliderValue, 0, 100);
-    if (GuiDropdownBox((Rectangle) { ncEditorData.anchor03.x + 172, ncEditorData.anchor03.y + 24, 120, 24 }, "DYNAMIC,STATIC,KINEMATIC", & ncEditorData.BodyTypeActive, ncEditorData.DropdownBox004EditMode)) ncEditorData.DropdownBox004EditMode = !ncEditorData.DropdownBox004EditMode;
+    if (GuiDropdownBox((Rectangle) { ncEditorData.anchor03.x + 172, ncEditorData.anchor03.y + 24, 120, 24 }, "DYNAMIC;STATIC;KINEMATIC", & ncEditorData.BodyTypeActive, ncEditorData.BodyTypeEditMode)) ncEditorData.BodyTypeEditMode = !ncEditorData.BodyTypeEditMode;
 
     DrawTexture(cursorTexture, position.x-cursorTexture.width/2, position.y-cursorTexture.height/2, WHITE);
     GuiUnlock();
+}
+
+ncBody* GetBodyIntersect(ncBody* bodies, Vector2 position)
+{
+    for (ncBody* body = bodies; body; body = body->next)
+    {
+        Vector2 screen = ConvertWorldToScreen(body->position);
+        if (CheckCollisionPointCircle(position, screen, ConvertWorldToPixel(body->mass)))
+        {
+            return body;
+        }
+    }
+
+    return NULL;
+}
+
+void DrawLineBodyToPosition(ncBody* body, Vector2 position)
+{
+    Vector2 screen = ConvertWorldToScreen(body->position);
+    DrawLine((int)screen.x, (int)screen.y, (int)position.x - cursorTexture.width / 2, (int)position.y - cursorTexture.height / 2, YELLOW);
 }

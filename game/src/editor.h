@@ -11,7 +11,7 @@ typedef struct ncEditorData
     float MassMinValue;
     float MassMaxValue;
     float GravitationValue;
-    bool DropdownBox004EditMode;
+    bool BodyTypeEditMode;
     int BodyTypeActive;
     float GravityScaleValue;
     float DampingSliderValue;
@@ -26,3 +26,6 @@ extern Texture2D cursorTexture;
 void InitEditor();
 void UpdateEditor(Vector2 mousePosition);
 void DrawEditor(Vector2 position);
+
+struct ncBody* GetBodyIntersect(struct ncBody* bodies, Vector2 position); 
+void DrawLineBodyToPosition(struct ncBody* body, Vector2 position);
