@@ -25,16 +25,19 @@ int main(void)
 	InitEditor();
 	SetTargetFPS(60);
 
+	float fixedTimestep = 1.0f / 60;
+	float timeAccumulator = 0.0f;
+
 	//initalize world
 	ncScreenZoom = 5;
 	ncGravity = (Vector2){ 0, -1};
-
 	//game loop
 	while (!WindowShouldClose())
 	{
 		//update 
 		float dt = GetFrameTime();
 		float fps = (float)GetFPS();
+		timeAccumulator += dt;
 
 		Vector2 position = GetMousePosition();
 		ncScreenZoom += GetMouseWheelMove() * 0.2f;
@@ -68,20 +71,25 @@ int main(void)
 				AddSpring(spring);
 			}
 		}
-
-		ApplyGravitation(ncBodies, ncEditorData.GravitationValue);
-		ApplySpringForce(ncSprings);
-		for (ncBody* body = ncBodies; body; body = body->next)
+		while (timeAccumulator >= fixedTimestep)
 		{
-			//ApplyForce(body, CreateVector2(0,-100),FM_FORCE);
-			Step(body, dt);
-		}
+			timeAccumulator -= fixedTimestep;
+			ApplyGravitation(ncBodies, ncEditorData.GravitationValue);
+			ApplySpringForce(ncSprings);
+			for (ncBody* body = ncBodies; body; body = body->next)
+			{
+				//ApplyForce(body, CreateVector2(0,-100),FM_FORCE);
+				Step(body, dt);
+			}
 
-		//collision
-		ncContact_t* contacts = NULL;
-		CreateContacts(ncBodies, &contacts);
-		SeparateContacts(contacts);
-		ResolveContacts(contacts);
+			//collision
+			ncContact_t* contacts = NULL;
+			CreateContacts(ncBodies, &contacts);
+			SeparateContacts(contacts);
+			ResolveContacts(contacts);
+		}
+		
+
 
 		//draw
 		BeginDrawing();
@@ -113,13 +121,13 @@ int main(void)
 			DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
 		}
 		//draw contact
-		for (ncContact_t* contact = contacts; contact; contact = contact->next)
-		{
-			Vector2 screen = ConvertWorldToScreen(contact->body1->position);
-			DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(contact->body1->mass*0.5f), RED);
+		//for (ncContact_t* contact = contacts; contact; contact = contact->next)
+		//{
+		//	Vector2 screen = ConvertWorldToScreen(contact->body1->position);
+		//	DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(contact->body1->mass*0.5f), RED);
 
 
-		}
+		//}
 		//stats
 		DrawText(TextFormat("FPS: %.2f (%.2fms)", fps,1000/fps), 10, 10, 20, LIME);
 		DrawEditor(position);

@@ -81,18 +81,19 @@ void SeparateContacts(ncContact_t* contacts)
 	}
 }
 
+//Resolves the contacts that are passed in by pushing the bodies away from each other. 
 void ResolveContacts(ncContact_t* contacts)
 {
-	// Loop through each contact in the linked list
+	//Loop through contacts
 	for (ncContact_t* contact = contacts; contact; contact = contact->next)
 	{
-		// Calculate the relative velocity of the two bodies at the contact point
+		// Calculate the relative velocity at the contact point
 		Vector2 rv = Vector2Subtract(contact->body1->velocity, contact->body2->velocity);
 
-		// Calculate the normal velocity component
+		// Calculate the normal velocity
 		float nv = Vector2DotProduct(rv, contact->normal);
 
-		// Check if the bodies are separating, if so, skip this contact
+		// If bodies are seperating skip
 		if (nv > 0) continue;
 
 		// Calculate the total inverse mass
@@ -104,10 +105,8 @@ void ResolveContacts(ncContact_t* contacts)
 		// Calculate the impulse vector
 		Vector2 impulseVector = Vector2Scale(contact->normal, impulseMagnitude);
 
-		// Apply the impulse to the first body
+		// Apply the impulse to the bodies negate second one
 		ApplyForce(contact->body1, impulseVector, FM_IMPULSE);
-
-		// Apply the negated impulse to the second body
 		ApplyForce(contact->body2, Vector2Negate(impulseVector), FM_IMPULSE);
 	}
 }
